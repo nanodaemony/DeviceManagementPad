@@ -13,12 +13,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class ParamCollector {
-
-    /**
-     * 请求码
-     */
-    private int requestCode;
+public class ParamPad {
 
     /**
      * MAC地址
@@ -28,7 +23,7 @@ public class ParamCollector {
     /**
      * 手术场次号
      */
-    private final int operationNumber = AppStatic.operationNumber;
+    private Integer collectionNumber;
 
     /**
      * 数据
@@ -43,18 +38,12 @@ public class ParamCollector {
         return JSON.toJSONString(this);
     }
 
-
-    /**
-     * 传入类型 其余默认值
-     * @param requestCode type
-     */
-    public ParamCollector(int requestCode) {
-        this.requestCode = requestCode;
+    public ParamPad(Integer collectionNumber) {
+        this.collectionNumber = collectionNumber;
     }
 
-
-    public ParamCollector(int requestCode, String data) {
-        this.requestCode = requestCode;
+    public ParamPad(Integer collectionNumber, String data) {
+        this.collectionNumber = collectionNumber;
         this.data = data;
     }
 }

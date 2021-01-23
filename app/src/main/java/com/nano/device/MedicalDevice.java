@@ -108,6 +108,12 @@ public class MedicalDevice implements HttpHandler {
     private boolean collectorSwitchOn;
 
     /**
+     * 服务器分配的采集序列号
+     */
+    private Integer collectionNumber;
+
+
+    /**
      * 采集的状态
      */
     private CollectionStatusEnum statusEnum;

@@ -41,9 +41,7 @@ import com.nano.AppStatic;
 import com.nano.common.logger.Logger;
 import com.nano.common.threadpool.ScheduleUtils;
 import com.nano.common.util.ToastUtil;
-import com.nano.activity.evaluation.DeviceEvaluationActivity;
 import com.nano.activity.mark.MarkEventActivity;
-import com.nano.datacollection.CollectionManager;
 import com.nano.datacollection.CollectionStatusEnum;
 import com.nano.device.DeviceUtil;
 import com.nano.device.MedicalDevice;
@@ -221,7 +219,7 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
         httpManager = new HttpManager(this);
 
         // 请求手术场次号
-        requestOperationNumber();
+        requestCollectionNumber();
 
         // 此处设置定时任务 10S为周期 延迟10秒再执行
         ScheduleUtils.executeTask(commonFixedTimeTask, 5, 10, TimeUnit.SECONDS);
@@ -230,10 +228,9 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
     }
 
     /**
-     * 延时1.5秒之后开始请求手术场次号
-     * 不能直接请求需要等待JS的Web把内容加载完成才能传入数据
+     * 延时1.5秒之后开始请求采集场次号
      */
-    private void requestOperationNumber() {
+    private void requestCollectionNumber() {
         // 上传基本信息
         new Thread() {
             @Override
@@ -243,7 +240,10 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                httpManager.postBasicInformationToGetOperationNumber(AppStatic.collectionBasicInfoEntity);
+                // 逐个上传信息
+                for (MedicalDevice device : DeviceUtil.getUsedDeviceList()) {
+                    httpManager.postMedicalDeviceInfo(device);
+                }
             }
         }.start();
         // 修改状态为正在请求手术场次号
@@ -395,22 +395,22 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
     @Override
     public void handleSuccessfulHttpMessage(HttpMessage message) {
         // 根据响应号进行处理
-        switch (message.getCode()) {
-            // 上传手术信息
-            case POST_BASIC_OPERATION_INFO:
-                logger.info("获取到的HTTPMessage:" + message.toString());
+        switch (message.getPathEnum()) {
+            // 上传仪器信息并获取采集场次号
+            case POST_MEDICAL_DEVICE_INFO:
                 try {
-                    // 解析手术场次号
-                    AppStatic.operationNumber = Integer.parseInt(message.getData());
+                    // 获取到采集场次号
+                    int collelctionNumber = Integer.parseInt(message.getData());
                     // (必须在UI线程改变UI)
                     this.runOnUiThread(() -> {
+                        // TODO: 这里进行采集场次号的展示
                         // 改变采集状态
-                        changeCollectionStatus("手术场次(" + AppStatic.operationNumber + ")" + "等待开始采集", getColor(R.color.titleColor));
+                        // changeCollectionStatus("手术场次(" + AppStatic.operationNumber + ")" + "等待开始采集", getColor(R.color.titleColor));
                     });
                 } catch (Exception e) {
                     e.printStackTrace();
-                    logger.error("手术场次号解析失败:" + message.getData());
-                    ToastUtil.toast(DataCollectionActivity.this, "手术场次号获取失败", TastyToast.ERROR);
+                    logger.error("采集场次号解析失败:" + message.getData());
+                    ToastUtil.toast(DataCollectionActivity.this, "采集场次号解析失败", TastyToast.ERROR);
                 }
                 break;
 

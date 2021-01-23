@@ -74,7 +74,7 @@ public class AddSomeOtherNewEventMarkActivity extends AppCompatActivity implemen
                 return;
             }
             // 上传事件
-            httpManager.postAddSomeOtherNewMarkEvent(JSON.toJSONString(new MarkEventInServer(markMainType, markSubType, markEvent)));
+            httpManager.postAddCustomizeMarkEvent(JSON.toJSONString(new MarkEventInServer(markMainType, markSubType, markEvent)));
         });
 
     }

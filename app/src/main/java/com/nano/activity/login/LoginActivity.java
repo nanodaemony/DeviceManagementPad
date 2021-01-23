@@ -20,7 +20,6 @@ import com.nano.http.HttpMessage;
 import com.nano.http.HttpManager;
 import com.nano.activity.healthrecord.HealthRecordActivity;
 import com.nano.common.logger.LoggerFactory;
-import com.nano.http.ServerPathEnum;
 import com.sdsmdg.tastytoast.TastyToast;
 
 
@@ -86,8 +85,6 @@ public class LoginActivity extends AppCompatActivity implements HttpHandler {
 
         });
 
-
-
         // 忘记密码
         tvForgetPassword.setOnClickListener(v -> SimpleDialog.show(LoginActivity.this, "忘记密码", "请联系QQ：1174520425", R.mipmap.help));
     }
@@ -101,22 +98,22 @@ public class LoginActivity extends AppCompatActivity implements HttpHandler {
         // 点击重庆大学的图标切换
         ivServerPathProfile.setOnClickListener(view -> {
             profileCounter++;
-            if (profileCounter % 6 == 0) {
-                AppStatic.serverPathEnum = ServerPathEnum.CLOUD_SERVER_PRE_PROD;
-                ToastUtil.toastSuccess(this, "当前网络:" + ServerPathEnum.CLOUD_SERVER_PRE_PROD.getInfoPath());
-                HttpManager.SERVER_INFO_PATH = AppStatic.serverPathEnum.getInfoPath();
-                HttpManager.SERVER_DATA_PATH = AppStatic.serverPathEnum.getDataPath();
-            } else if (profileCounter % 8 == 0) {
-                AppStatic.serverPathEnum = ServerPathEnum.LOCAL_WIFI;
-                ToastUtil.toastSuccess(this, "当前网络:" + ServerPathEnum.LOCAL_WIFI.getInfoPath());
-                HttpManager.SERVER_INFO_PATH = AppStatic.serverPathEnum.getInfoPath();
-                HttpManager.SERVER_DATA_PATH = AppStatic.serverPathEnum.getDataPath();
-            } else if (profileCounter % 10 == 0) {
-                AppStatic.serverPathEnum = ServerPathEnum.CLOUD_SERVER_PROD;
-                ToastUtil.toastSuccess(this, "当前网络:" + ServerPathEnum.CLOUD_SERVER_PROD.getInfoPath());
-                HttpManager.SERVER_INFO_PATH = AppStatic.serverPathEnum.getInfoPath();
-                HttpManager.SERVER_DATA_PATH = AppStatic.serverPathEnum.getDataPath();
-            }
+//            if (profileCounter % 6 == 0) {
+//                AppStatic.serverPathEnum = ServerPathEnum.CLOUD_SERVER_PRE_PROD;
+//                ToastUtil.toastSuccess(this, "当前网络:" + ServerPathEnum.CLOUD_SERVER_PRE_PROD.getInfoPath());
+//                HttpManager.SERVER_IP = AppStatic.serverPathEnum.getInfoPath();
+//                // HttpManager.SERVER_DATA_PATH = AppStatic.serverPathEnum.getDataPath();
+//            } else if (profileCounter % 8 == 0) {
+//                AppStatic.serverPathEnum = ServerPathEnum.LOCAL_WIFI;
+//                ToastUtil.toastSuccess(this, "当前网络:" + ServerPathEnum.LOCAL_WIFI.getInfoPath());
+//                HttpManager.SERVER_IP = AppStatic.serverPathEnum.getInfoPath();
+//                // HttpManager.SERVER_DATA_PATH = AppStatic.serverPathEnum.getDataPath();
+//            } else if (profileCounter % 10 == 0) {
+//                AppStatic.serverPathEnum = ServerPathEnum.CLOUD_SERVER_PROD;
+//                ToastUtil.toastSuccess(this, "当前网络:" + ServerPathEnum.CLOUD_SERVER_PROD.getInfoPath());
+//                HttpManager.SERVER_IP = AppStatic.serverPathEnum.getInfoPath();
+//                // HttpManager.SERVER_DATA_PATH = AppStatic.serverPathEnum.getDataPath();
+//            }
         });
     }
 
