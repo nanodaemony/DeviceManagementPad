@@ -5,7 +5,7 @@ import com.nano.common.logger.Logger;
 import com.nano.datacollection.DeviceData;
 import com.nano.datacollection.parsedata.DeviceDataParser;
 import com.nano.datacollection.parsedata.DataParseUtils;
-import com.nano.datacollection.parsedata.UpdateDataEntity;
+import com.nano.datacollection.parsedata.ParamDeviceDataPad;
 import com.nano.datacollection.parsedata.entity.DataMaiRuiT8;
 
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ public class DataParserMaiRuiT8 implements DeviceDataParser {
      * @return 数据
      */
     @Override
-    public DeviceData parseData(int deviceCode, String serialNumber, String deviceOriginData) {
+    public DeviceData parseData(int deviceCode, Integer collectionNumber, String serialNumber, String deviceOriginData) {
 
         DataMaiRuiT8 dataMaiRuiT8 = new DataMaiRuiT8();
         dataMaiRuiT8.setSerialNumber(serialNumber);
@@ -65,7 +65,7 @@ public class DataParserMaiRuiT8 implements DeviceDataParser {
 
         String dataString = JSON.toJSONString(dataMaiRuiT8);
         // 返回解析好的数据
-        return new DeviceData(deviceCode, dataMaiRuiT8, JSON.toJSONString(new UpdateDataEntity(deviceCode, dataString)));
+        return new DeviceData(deviceCode, dataMaiRuiT8, JSON.toJSONString(new ParamDeviceDataPad(deviceCode, collectionNumber, dataString)));
     }
 
 

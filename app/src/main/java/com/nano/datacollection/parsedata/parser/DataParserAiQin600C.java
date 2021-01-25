@@ -4,8 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.nano.datacollection.DeviceData;
 import com.nano.datacollection.parsedata.DataParseUtils;
 import com.nano.datacollection.parsedata.DeviceDataParser;
-import com.nano.datacollection.parsedata.UpdateDataEntity;
-import com.nano.datacollection.parsedata.entity.DataAiQin600B;
+import com.nano.datacollection.parsedata.ParamDeviceDataPad;
 import com.nano.datacollection.parsedata.entity.DataAiQin600C;
 
 /**
@@ -26,7 +25,7 @@ public class DataParserAiQin600C implements DeviceDataParser {
      * @return 数据
      */
     @Override
-    public DeviceData parseData(int deviceCode, String serialNumber, String deviceOriginData) {
+    public DeviceData parseData(int deviceCode, Integer collectionNumber, String serialNumber, String deviceOriginData) {
 
         DataAiQin600C dataAiQin600C = new DataAiQin600C();
         dataAiQin600C.setSerialNumber(serialNumber);
@@ -57,7 +56,7 @@ public class DataParserAiQin600C implements DeviceDataParser {
 
         String dataString = JSON.toJSONString(dataAiQin600C);
         // 返回解析好的数据
-        return new DeviceData(deviceCode, dataAiQin600C, JSON.toJSONString(new UpdateDataEntity(deviceCode, dataString)));
+        return new DeviceData(deviceCode, dataAiQin600C, JSON.toJSONString(new ParamDeviceDataPad(deviceCode, collectionNumber, dataString)));
     }
 
 

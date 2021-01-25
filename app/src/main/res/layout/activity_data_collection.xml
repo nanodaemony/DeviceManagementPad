@@ -24,14 +24,15 @@
             android:background="@color/toolBarColor"
             app:popupTheme="@style/AppTheme.PopupOverlay">
 
-            <!--整体采集状态的信息框-->
-            <TextView
-                android:id="@+id/collection_data_whole_status"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="尚未开始"
-                android:textSize="15sp" />
+<!--            &lt;!&ndash;整体采集状态的信息框&ndash;&gt;-->
+<!--            <TextView-->
+<!--                android:id="@+id/collection_data_whole_status"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:gravity="center"-->
+<!--                android:text="尚未开始"-->
+<!--                android:textSize="15sp" />-->
+
         </android.support.v7.widget.Toolbar>
 
 

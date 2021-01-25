@@ -82,9 +82,9 @@ public class AddSomeOtherNewEventMarkActivity extends AppCompatActivity implemen
 
     @Override
     public void handleSuccessfulHttpMessage(HttpMessage message) {
-        switch (message.getCode()) {
+        switch (message.getPathEnum()) {
 
-            case POST_ADD_SOME_OTHER_NEW_MARK_EVENT:
+            case ADD_CUSTOMIZE_MARK_EVENT:
                 // 弹出添加成功的消息
                 runOnUiThread(() -> {
                     SimpleDialog.show(this, "上传成功",

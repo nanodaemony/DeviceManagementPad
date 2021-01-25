@@ -179,14 +179,6 @@ public class DeviceChooseActivity extends AppCompatActivity implements HttpHandl
                     PersistUtil.putLongValue("DeviceLastUseTime" + device.getDeviceCode(), System.currentTimeMillis());
                 }
             }
-            // 构造上传到服务器的仪器信息
-            List<InfoDevice> infoDeviceList = new ArrayList<>(6);
-            for (MedicalDevice medicalDevice : AppStatic.medicalDeviceMap.values()) {
-                if (medicalDevice.isDeviceUsed()) {
-                    infoDeviceList.add(new InfoDevice("" + medicalDevice.getDeviceCode(), medicalDevice.getSerialNumber(), (double) medicalDevice.getServiceLife()));
-                }
-            }
-            AppStatic.collectionBasicInfoEntity.setUsedDeviceInfo(JSON.toJSONString(infoDeviceList));
             Intent intent = new Intent(this, DataCollectionActivity.class);
             startActivity(intent);
         });
@@ -217,30 +209,6 @@ public class DeviceChooseActivity extends AppCompatActivity implements HttpHandl
         runOnUiThread(() -> ToastUtil.toastSuccess(this, "网络异常"));
     }
 
-
-    /**
-     * 用于上传到服务器的仪器信息类
-     * @author cz
-     */
-    @Data
-    private  static class InfoDevice implements Serializable {
-
-        private static final long serialVersionUID = 233410313766289238L;
-        // 仪器号
-        private String deviceCode;
-        // 序列号
-        private String deviceSerialNumber;
-        // 生产日期
-        private LocalDate deviceProduceDate;
-        // 服务年限
-        private Double deviceServiceLife;
-
-        public InfoDevice(String deviceCode, String deviceSerialNumber, Double deviceServiceLife) {
-            this.deviceCode = deviceCode;
-            this.deviceSerialNumber = deviceSerialNumber;
-            this.deviceServiceLife = deviceServiceLife;
-        }
-    }
 
 
     /**

@@ -33,7 +33,6 @@ public enum ServerPathEnum {
      */
     DEVICE_FINISH_COLLECTION("/eval/device-collection/device-finish-collection-pad"),
 
-
     /**
      * 仪器放弃采集
      */
@@ -78,6 +77,10 @@ public enum ServerPathEnum {
     ADD_CUSTOMIZE_MARK_EVENT("/eval/mark-event/add-customise-mark-event"),
 
 
+    /**
+     * 上传仪器数据
+     */
+    POST_DEVICE_DATA("/eval/device-data/add-device-data-pad"),
 
     ;
     @Getter

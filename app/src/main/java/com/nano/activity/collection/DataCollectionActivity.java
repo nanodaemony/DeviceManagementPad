@@ -32,6 +32,7 @@ import com.nano.activity.collection.interfaces.FragmentOperationHandler;
 import com.nano.activity.evaluation.DeviceEvaluationFragment;
 import com.nano.activity.evaluation.DeviceEvaluationTable;
 import com.nano.activity.evaluation.FragmentEvaluationHandler;
+import com.nano.activity.mark.MarkEvent;
 import com.nano.common.threadpool.ThreadPoolUtils;
 import com.nano.activity.login.LoginActivity;
 import com.nano.activity.mark.MarkEventUtil;
@@ -53,7 +54,6 @@ import com.sdsmdg.tastytoast.TastyToast;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -83,12 +83,6 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
      * Logger
      */
     private Logger logger = new Logger("CollectionActivity");
-
-    /**
-     * 整体采集状态
-     */
-    private TextView tvWholeCollectionStatus;
-
 
     /**
      * 几个仪器的布局ID
@@ -141,9 +135,6 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
         // 侧边导航栏的布局
         NavigationView navigationView = findViewById(R.id.collection_nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-        // 整体采集状态
-        tvWholeCollectionStatus = findViewById(R.id.collection_data_whole_status);
 
         // 初始化几个仪器展示的布局
         deviceLayoutIds[0] = (R.id.collection_device_layout_collection_1);
@@ -209,8 +200,13 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
      */
     private void functionInit() {
 
+        logger.info(DeviceUtil.getUsedDeviceList().size() + "");
         // 打印出采集的基本信息：含手术信息和仪器信息
-        logger.info(JSON.toJSONString("本次采集信息:" + AppStatic.collectionBasicInfoEntity));
+        for (MedicalDevice device : DeviceUtil.getUsedDeviceList()) {
+            logger.info(device.toString());
+            logger.info("本次采集仪器:" + device.getDeviceCode() + ", " + device.getDeviceName());
+            requestCollectionNumber(device);
+        }
 
         // 注册EventBus
         EventBus.getDefault().register(this);
@@ -219,7 +215,7 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
         httpManager = new HttpManager(this);
 
         // 请求手术场次号
-        requestCollectionNumber();
+        //requestCollectionNumber();
 
         // 此处设置定时任务 10S为周期 延迟10秒再执行
         ScheduleUtils.executeTask(commonFixedTimeTask, 5, 10, TimeUnit.SECONDS);
@@ -230,25 +226,16 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
     /**
      * 延时1.5秒之后开始请求采集场次号
      */
-    private void requestCollectionNumber() {
-        // 上传基本信息
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(1000);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                // 逐个上传信息
-                for (MedicalDevice device : DeviceUtil.getUsedDeviceList()) {
-                    httpManager.postMedicalDeviceInfo(device);
-                }
+    private void requestCollectionNumber(MedicalDevice device) {
+        ThreadPoolUtils.executeNormalTask(() -> {
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        }.start();
-        // 修改状态为正在请求手术场次号
-        changeCollectionStatus("请求手术场次号中...", getColor(R.color.gettingOperationNumber));
-        logger.info("正在请求手术场次号...");
+            // 逐个上传信息
+            httpManager.postMedicalDeviceInfoAndGetCollectionNumber(device);
+        });
     }
 
 
@@ -259,17 +246,13 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
      */
     @Override
     public void handleDeviceStartCollection(MessageEntity messageEntity) {
-
-        // 说明没有获取到手术场次号
-        if (AppStatic.operationNumber == 0) {
-            // 重新获取
-            httpManager.postBasicInformationToGetOperationNumber(AppStatic.collectionBasicInfoEntity);
-            ToastUtil.toastError(this, "当前尚未获取手术场次号,正在重新获取中...");
-            return;
-        }
-
         // 获取当前正在操作的仪器
         MedicalDevice device = DeviceUtil.getMedicalDevice(messageEntity.getDeviceCode());
+        if (device.getCollectionNumber() == 0) {
+            ToastUtil.toastError(this, "采集场次号为空,正在重新获取...");
+            httpManager.postMedicalDeviceInfoAndGetCollectionNumber(device);
+            return;
+        }
         // 如果不是等待采集状态
         if (device.getStatusEnum() != CollectionStatusEnum.WAITING_START) {
             ToastUtil.toast(getApplicationContext(), "当前仪器不是等待采集状态,无法开始采集.", TastyToast.WARNING);
@@ -283,7 +266,7 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
                 //添加"Yes"按钮
                 .setPositiveButton("确定", (dialogInterface, i) -> {
                     // 发送开始请求
-                    httpManager.postDeviceCollectionStart(device.getDeviceEnum());
+                    httpManager.postDeviceCollectionStart(device);
                 })
                 // 添加取消
                 .setNegativeButton("取消", (dialogInterface, i) -> {
@@ -314,7 +297,7 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
                 //添加"Yes"按钮
                 .setPositiveButton("确定", (dialogInterface, i) -> {
                     // 发送结束请求
-                    httpManager.postDeviceCollectionStop(device.getDeviceEnum());
+                    httpManager.postDeviceCollectionStop(device);
                 })
                 // 添加取消
                 .setNegativeButton("取消", (dialogInterface, i) -> {
@@ -343,7 +326,7 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
                 //添加"Yes"按钮
                 .setPositiveButton("确定", (dialogInterface, i) -> {
                     // 发送结束请求
-                    httpManager.postDeviceCollectionAbandon(device.getDeviceEnum());
+                    httpManager.postDeviceCollectionAbandon(device);
                 })
                 // 添加取消
                 .setNegativeButton("取消", (dialogInterface, i) -> {
@@ -367,13 +350,7 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
                 //添加"Yes"按钮
                 .setPositiveButton("确定", (dialogInterface, i) -> {
                     // 下面进行评价信息上传
-                    DeviceEvaluationTable evaluationTable = device.getDeviceEvaluationTable();
-                    // 即使是单个TABLE也需要构造成list上传
-                    List<DeviceEvaluationTable> evaluationTableList = new ArrayList<>();
-                    if (evaluationTable != null) {
-                        evaluationTableList.add(device.getDeviceEvaluationTable());
-                        httpManager.postDeviceEvaluationInfo(JSON.toJSONString(evaluationTableList));
-                    }
+                    httpManager.postDeviceEvaluationInfo(device.getDeviceEvaluationTable());
                 })
                 // 添加取消
                 .setNegativeButton("取消", (dialogInterface, i) -> {
@@ -398,14 +375,21 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
         switch (message.getPathEnum()) {
             // 上传仪器信息并获取采集场次号
             case POST_MEDICAL_DEVICE_INFO:
+                logger.info(message.toString());
                 try {
                     // 获取到采集场次号
-                    int collelctionNumber = Integer.parseInt(message.getData());
+                    int deviceCode = Integer.parseInt(message.getData());
+                    int collectionNumber = Integer.parseInt(message.getData2());
+                    // 添加到列表中
+                    AppStatic.collectionNumberList.add(collectionNumber);
                     // (必须在UI线程改变UI)
                     this.runOnUiThread(() -> {
-                        // TODO: 这里进行采集场次号的展示
-                        // 改变采集状态
-                        // changeCollectionStatus("手术场次(" + AppStatic.operationNumber + ")" + "等待开始采集", getColor(R.color.titleColor));
+                        DeviceUnity unity = usedDeviceUnityMap.get(deviceCode);
+                        if (unity != null) {
+                            unity.getMedicalDevice().setCollectionNumber(collectionNumber);
+                            // 通知可以进行开始了
+                            unity.getFragmentDataExchanger().updateCollectionStatus(CollectionStatusEnum.WAITING_START);
+                        }
                     });
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -415,59 +399,59 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
                 break;
 
             // 上传仪器开始采集信息
-            case POST_DEVICE_COLLECTION_START:
-                // 获取仪器号
-                int startDeviceCode = Integer.parseInt(message.getData());
-                DeviceUnity startUnity = usedDeviceUnityMap.get(startDeviceCode);
-                if (startUnity != null) {
-                    // 开启这个仪器的采集线程
-                    startUnity.getUsedCollector().startCollection();
-                    // 修改仪器采集状态
-                    startUnity.getMedicalDevice().setStatusEnum(CollectionStatusEnum.COLLECTING);
-                    // 更改显示的采集状态
-                    this.runOnUiThread(() -> {
-                        // 设置为开始采集
-                        startUnity.getFragmentDataExchanger().updateCollectionStatus(CollectionStatusEnum.COLLECTING);
-                        // 如果当前是第一个仪器开始采集
-                        if (DataCollectionUtils.isFirstDeviceToStartCollection(usedDeviceUnityMap)) {
-                            // 改变采集状态
-                            changeCollectionStatus("手术场次(" + AppStatic.operationNumber + ")" + "正在采集", getColor(R.color.colorAccent));
-                        }
-                    });
+            case DEVICE_START_COLLECTION:
+                try {
+                    int deviceCode = Integer.parseInt(message.getData());
+                    // 获取仪器号
+                    DeviceUnity startUnity = usedDeviceUnityMap.get(deviceCode);
+                    if (startUnity != null) {
+                        // 开启这个仪器的采集线程
+                        startUnity.getUsedCollector().startCollection();
+                        // 修改仪器采集状态
+                        startUnity.getMedicalDevice().setStatusEnum(CollectionStatusEnum.COLLECTING);
+                        // 更改显示的采集状态
+                        this.runOnUiThread(() -> {
+                            // 设置为开始采集
+                            startUnity.getFragmentDataExchanger().updateCollectionStatus(CollectionStatusEnum.COLLECTING);
+                        });
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
                 break;
 
-            // 上传仪器停止采集信息
-            case POST_DEVICE_COLLECTION_STOP:
-                // 获取仪器号
-                int stopDeviceCode = Integer.parseInt(message.getData());
-                DeviceUnity stopUnity = usedDeviceUnityMap.get(stopDeviceCode);
-                if (stopUnity != null) {
-                    // 停止采集线程
-                    stopUnity.getUsedCollector().stopCollection();
-                    // 修改仪器采集状态
-                    stopUnity.getMedicalDevice().setStatusEnum(CollectionStatusEnum.FINISHED);
-                    // 更改显示的采集状态
-                    this.runOnUiThread(() -> {
-                        stopUnity.getFragmentDataExchanger().updateCollectionStatus(CollectionStatusEnum.FINISHED);
-                        FragmentManager fragmentManager = getSupportFragmentManager();
-                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                        DeviceEvaluationFragment evaluationFragment = new DeviceEvaluationFragment();
-                        stopUnity.setEvaluationFragment(evaluationFragment);
-                        // 传递仪器序号给Fragment
-                        Bundle bundle = new Bundle();
-                        bundle.putInt("deviceCode", stopDeviceCode);
-                        evaluationFragment.setArguments(bundle);
-                        replaceFragment(stopUnity.getDeviceLayoutIds(), evaluationFragment);
-                        fragmentTransaction.commit();
-                    });
+            // 上传仪器停止(完成)采集信息
+            case DEVICE_FINISH_COLLECTION:
+                try {
+                    int deviceCode = Integer.parseInt(message.getData());
+                    DeviceUnity stopUnity = usedDeviceUnityMap.get(deviceCode);
+                    if (stopUnity != null) {
+                        // 停止采集线程
+                        stopUnity.getUsedCollector().stopCollection();
+                        // 修改仪器采集状态
+                        stopUnity.getMedicalDevice().setStatusEnum(CollectionStatusEnum.FINISHED);
+                        // 更改显示的采集状态
+                        this.runOnUiThread(() -> {
+                            stopUnity.getFragmentDataExchanger().updateCollectionStatus(CollectionStatusEnum.FINISHED);
+                            FragmentManager fragmentManager = getSupportFragmentManager();
+                            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                            DeviceEvaluationFragment evaluationFragment = new DeviceEvaluationFragment();
+                            stopUnity.setEvaluationFragment(evaluationFragment);
+                            // 传递仪器序号给Fragment
+                            Bundle bundle = new Bundle();
+                            bundle.putInt("deviceCode", deviceCode);
+                            evaluationFragment.setArguments(bundle);
+                            replaceFragment(stopUnity.getDeviceLayoutIds(), evaluationFragment);
+                            fragmentTransaction.commit();
+                        });
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
                 break;
 
             // 上传仪器评价信息
-            case POST_DEVICE_EVALUATION_TABLE:
-
+            case AFTER_COLLECTION_EVALUATION_TABLE_ADD:
                 try {
                     // 获取仪器号及对应操作Unity
                     List<String> tableList = JSON.parseArray(message.getData(), String.class);
@@ -504,10 +488,16 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
                 break;
 
             // 上传仪器放弃采集信息
-            case POST_DEVICE_COLLECTION_ABANDON:
+            case DEVICE_ABANDON_COLLECTION:
+
+                // 获取采集号
+                int abandonCollectionNumber = Integer.parseInt(message.getData());
+                MedicalDevice abandonDevice = DeviceUtil.getMedicalDeviceByCollectionNumber(abandonCollectionNumber);
+                if (abandonDevice == null) {
+                    return;
+                }
                 // 获取仪器号及对应操作Unity
-                int abandonDeviceCode = Integer.parseInt(message.getData());
-                DeviceUnity abandonUnity = usedDeviceUnityMap.get(abandonDeviceCode);
+                DeviceUnity abandonUnity = usedDeviceUnityMap.get(abandonDevice.getDeviceCode());
                 if (abandonUnity != null) {
                     // 停止采集
                     runOnUiThread(() -> {
@@ -520,7 +510,7 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
                         // 既然已经放弃,就要删掉一些信息
                         // 将当前仪器设置为非使用状态
                         abandonUnity.getMedicalDevice().setDeviceUsed(false);
-                        usedDeviceUnityMap.remove(abandonDeviceCode);
+                        usedDeviceUnityMap.remove(abandonDevice.getDeviceCode());
                         ToastUtil.toast(DataCollectionActivity.this, "已放弃该仪器数据采集", TastyToast.INFO);
 
                         // 判断本次采集的仪器是否都已经全部上传完成了,如果是则弹出reboot的弹窗
@@ -637,7 +627,7 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
         btnConfirmChoose.setOnClickListener(v1 -> {
             // 本次使用的仪器全部Abandon
             for (MedicalDevice device : DeviceUtil.getUsedDeviceList()) {
-                httpManager.postDeviceCollectionAbandon(device.getDeviceEnum());
+                httpManager.postDeviceCollectionAbandon(device);
             }
             ThreadPoolUtils.executeNormalTask(() -> {
                 try {
@@ -659,13 +649,6 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
     }
 
 
-    /**
-     * 改变采集显示状态
-     */
-    private void changeCollectionStatus(String status, int textColor) {
-        tvWholeCollectionStatus.setText(status);
-        tvWholeCollectionStatus.setTextColor(textColor);
-    }
 
 
     /**
@@ -686,8 +669,11 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
     private void updateMarkEventList() {
         // 如果列表没有全部上传完成且采集状态为采集中则进行上传
         if (!MarkEventUtil.isAllMarkEventUpdated()) {
-            // 上传标记事件列表
-            httpManager.postMarkEvent(JSON.toJSONString(MarkEventUtil.getNotUpdateMarkEvent()));
+            List<MarkEvent> notUpdateMarkEventList = MarkEventUtil.getNotUpdateMarkEvent();
+            for (MarkEvent event : notUpdateMarkEventList) {
+                // 上传标记事件列表
+                httpManager.postMarkEvent(event);
+            }
         }
     }
 
@@ -780,12 +766,7 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
      * 通用定时任务
      */
     private Runnable commonFixedTimeTask = () -> {
-        // 说明还没获取到手术场次号
-        if (AppStatic.operationNumber == -1) {
-            // 尝试再次请求手术场次号
-            httpManager.postBasicInformationToGetOperationNumber(AppStatic.collectionBasicInfoEntity);
-            ToastUtil.toastWarn(DataCollectionActivity.this, "正在尝试重新获取手术场次号,请稍等");
-        }
+
     };
 
     /**

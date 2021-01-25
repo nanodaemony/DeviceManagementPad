@@ -15,6 +15,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ParamPad {
 
+    private static final long serialVersionUID = 233410313723289238L;
+
     /**
      * MAC地址
      */

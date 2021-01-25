@@ -5,7 +5,7 @@ import com.nano.common.logger.Logger;
 import com.nano.datacollection.DeviceData;
 import com.nano.datacollection.parsedata.DataCons;
 import com.nano.datacollection.parsedata.DeviceDataParser;
-import com.nano.datacollection.parsedata.UpdateDataEntity;
+import com.nano.datacollection.parsedata.ParamDeviceDataPad;
 import com.nano.datacollection.parsedata.entity.DataNuoHe;
 
 /**
@@ -28,7 +28,7 @@ public class DataParserNuoHeV405 implements DeviceDataParser {
      * @return 数据
      */
     @Override
-    public DeviceData parseData(int deviceCode, String serialNumber, String deviceOriginData) {
+    public DeviceData parseData(int deviceCode, Integer collectionNumber, String serialNumber, String deviceOriginData) {
         // 初始化数据结构
         DataNuoHe dataNuoHe = new DataNuoHe();
         // 设置序列号
@@ -65,7 +65,7 @@ public class DataParserNuoHeV405 implements DeviceDataParser {
         }
         String dataString = JSON.toJSONString(dataNuoHe);
         // 返回解析好的数据
-        return new DeviceData(deviceCode, dataNuoHe, JSON.toJSONString(new UpdateDataEntity(deviceCode, dataString)));
+        return new DeviceData(deviceCode, dataNuoHe, JSON.toJSONString(new ParamDeviceDataPad(deviceCode, collectionNumber, dataString)));
     }
 
     /**

@@ -5,7 +5,9 @@ import com.nano.activity.healthrecord.CollectionBasicInfoEntity;
 import com.nano.common.logger.LogLevelEnum;
 import com.nano.common.util.CommonUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -82,6 +84,11 @@ public class AppStatic {
      * 存放全部仪器信息的MAP
      */
     public static Map<Integer, MedicalDevice> medicalDeviceMap;
+
+    /**
+     * 存放采集场次号的列表
+     */
+    public static List<Integer> collectionNumberList = new ArrayList<>();
 
     /**
      * 调试信息日志数量
