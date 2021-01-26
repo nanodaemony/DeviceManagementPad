@@ -23,6 +23,7 @@ public class DataParserPuKe implements DeviceDataParser {
     public DeviceData parseData(int deviceCode, Integer collectionNumber, String serialNumber, String deviceOriginData) {
         DataPuKe dataPuKe = new DataPuKe();
         dataPuKe.setSerialNumber(serialNumber);
+        dataPuKe.setCollectionNumber(collectionNumber);
         if (verifyData(deviceOriginData)) {
             String[] values = deviceOriginData.split(" ");
             int ai = Integer.parseInt(values[3], 16);

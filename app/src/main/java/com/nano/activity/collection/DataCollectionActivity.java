@@ -94,6 +94,7 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
      */
     private Map<Integer, DeviceUnity> usedDeviceUnityMap;
 
+    private Chip btnControlAllDevice;
 
     private HttpManager httpManager;
 
@@ -169,6 +170,30 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
             Intent intent = new Intent(DataCollectionActivity.this, MarkEventActivity.class);
             startActivity(intent);
         });
+
+        // 控制所有仪器的开始与结束
+        btnControlAllDevice = findViewById(R.id.material_button_controll_all_collection);
+        btnControlAllDevice.setOnClickListener(view -> {
+
+            for (MedicalDevice device : DeviceUtil.getUsedDeviceList()) {
+                // 如果有等待采集的那就弹出
+                if (device.getStatusEnum() == CollectionStatusEnum.WAITING_START) {
+                    // 弹出全部开始日志
+                    showAllDeviceStartCollectionDialog();
+                    return;
+                }
+            }
+            for (MedicalDevice device : DeviceUtil.getUsedDeviceList()) {
+                if (device.getStatusEnum() == CollectionStatusEnum.WAITING_START) {
+                    ToastUtil.toastWarn(this, "当前有仪器还未开始采集,无法全部停止.");
+                    return;
+                }
+            }
+            // 说明全部都已经开始或者停止了
+            // 弹出全部开始日志
+            showAllDeviceFinishCollectionDialog();
+        });
+
 
         // 测试按钮
         layoutTest = findViewById(R.id.collection_textView_test_card);
@@ -362,10 +387,11 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
 
     /**
      * 处理成功的HTTP请求
-     *
+     * <p>
      * 1. 只有完成采集才能进行Abandon.
      * 2. 完成采集后选择是否需要Abandon以及是否进行评价
      * 3.
+     *
      * @param message 数据
      */
     @SuppressLint("SetTextI18n")
@@ -453,27 +479,24 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
             // 上传仪器评价信息
             case AFTER_COLLECTION_EVALUATION_TABLE_ADD:
                 try {
-                    // 获取仪器号及对应操作Unity
-                    List<String> tableList = JSON.parseArray(message.getData(), String.class);
-                    for (String tableUniqueNumber : tableList) {
-                        // 寻找满足评价表唯一号的所有信息
-                        for (Map.Entry<Integer, DeviceUnity> entry : usedDeviceUnityMap.entrySet()) {
-                            DeviceEvaluationTable evaluationTable = entry.getValue().getMedicalDevice().getDeviceEvaluationTable();
-                            if (evaluationTable != null && evaluationTable.getUniqueNumber().equals(tableUniqueNumber)) {
-                                // 将当前仪器的状态设置为评价信息已上传
-                                entry.getValue().getMedicalDevice().setEvaluationTableUpdated(true);
-                                runOnUiThread(() -> {
-                                    // 接收评价信息成功则取消当前界面
-                                    FragmentManager fragmentManager = getSupportFragmentManager();
-                                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                                    fragmentTransaction.remove(entry.getValue().getEvaluationFragment());
-                                    fragmentTransaction.commit();
-                                    ToastUtil.toastSuccess(this, "当前仪器数据采集完成");
-                                });
-                            }
+
+                    String tableUniqueNumber = message.getData();
+                    // 寻找满足评价表唯一号的所有信息
+                    for (Map.Entry<Integer, DeviceUnity> entry : usedDeviceUnityMap.entrySet()) {
+                        DeviceEvaluationTable evaluationTable = entry.getValue().getMedicalDevice().getDeviceEvaluationTable();
+                        if (evaluationTable != null && evaluationTable.getUniqueNumber().equals(tableUniqueNumber)) {
+                            // 将当前仪器的状态设置为评价信息已上传
+                            entry.getValue().getMedicalDevice().setEvaluationTableUpdated(true);
+                            runOnUiThread(() -> {
+                                // 接收评价信息成功则取消当前界面
+                                FragmentManager fragmentManager = getSupportFragmentManager();
+                                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                                fragmentTransaction.remove(entry.getValue().getEvaluationFragment());
+                                fragmentTransaction.commit();
+                                ToastUtil.toastSuccess(this, "当前仪器数据采集完成");
+                            });
                         }
                     }
-
                     runOnUiThread(() -> {
                         // 判断本次采集的仪器是否都已经全部上传完成了,如果是则弹出reboot的弹窗
                         if (isAllDeviceFinishOrAbandon()) {
@@ -489,15 +512,9 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
 
             // 上传仪器放弃采集信息
             case DEVICE_ABANDON_COLLECTION:
-
-                // 获取采集号
-                int abandonCollectionNumber = Integer.parseInt(message.getData());
-                MedicalDevice abandonDevice = DeviceUtil.getMedicalDeviceByCollectionNumber(abandonCollectionNumber);
-                if (abandonDevice == null) {
-                    return;
-                }
+                int deviceCode = Integer.parseInt(message.getData());
                 // 获取仪器号及对应操作Unity
-                DeviceUnity abandonUnity = usedDeviceUnityMap.get(abandonDevice.getDeviceCode());
+                DeviceUnity abandonUnity = usedDeviceUnityMap.get(deviceCode);
                 if (abandonUnity != null) {
                     // 停止采集
                     runOnUiThread(() -> {
@@ -510,7 +527,7 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
                         // 既然已经放弃,就要删掉一些信息
                         // 将当前仪器设置为非使用状态
                         abandonUnity.getMedicalDevice().setDeviceUsed(false);
-                        usedDeviceUnityMap.remove(abandonDevice.getDeviceCode());
+                        usedDeviceUnityMap.remove(deviceCode);
                         ToastUtil.toast(DataCollectionActivity.this, "已放弃该仪器数据采集", TastyToast.INFO);
 
                         // 判断本次采集的仪器是否都已经全部上传完成了,如果是则弹出reboot的弹窗
@@ -550,19 +567,76 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
     /**
      * 弹出日志消息的弹窗
      */
-    private void showErrorLogDialog(){
+    private void showErrorLogDialog() {
         StringBuilder stringBuilder = new StringBuilder();
-        List<String> logString  = Logger.getErrorList();
-        for (String string : logString){
+        List<String> logString = Logger.getErrorList();
+        for (String string : logString) {
             stringBuilder.append(string).append("\n");
         }
         SimpleDialog.show(this, "错误日志信息", stringBuilder.toString(), R.mipmap.error_info);
     }
 
+
+    /**
+     * 弹出全部仪器开始采集的弹窗
+     */
+    private void showAllDeviceStartCollectionDialog() {
+        // 这里弹出确定开始的弹窗
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setTitle("开始采集")
+                .setMessage("确定开始所有采集仪器的数据采集?")
+                .setIcon(R.mipmap.question)
+                //添加"Yes"按钮
+                .setPositiveButton("确定", (dialogInterface, i) -> {
+                    // 处于等待状态的就开始
+                    for (MedicalDevice device : DeviceUtil.getUsedDeviceList()) {
+                        if (device.getStatusEnum() == CollectionStatusEnum.WAITING_START) {
+                            // 发送开始请求
+                            httpManager.postDeviceCollectionStart(device);
+                        }
+                    }
+                    btnControlAllDevice.setText("全部完成采集");
+                })
+                // 添加取消
+                .setNegativeButton("取消", (dialogInterface, i) -> {
+                })
+                .create();
+        alertDialog.show();
+    }
+
+
+    /**
+     * 弹出全部仪器完成采集的弹窗
+     */
+    private void showAllDeviceFinishCollectionDialog() {
+        // 这里弹出确定开始的弹窗
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setTitle("完成采集")
+                .setMessage("确定完成所有采集仪器的数据采集?")
+                .setIcon(R.mipmap.question)
+                //添加"Yes"按钮
+                .setPositiveButton("确定", (dialogInterface, i) -> {
+                    // 处于等待状态的就开始
+                    for (MedicalDevice device : DeviceUtil.getUsedDeviceList()) {
+                        if (device.getStatusEnum() == CollectionStatusEnum.COLLECTING) {
+                            // 发送开始请求
+                            httpManager.postDeviceCollectionStop(device);
+                        }
+                    }
+                    btnControlAllDevice.setText("全部完成采集");
+                })
+                // 添加取消
+                .setNegativeButton("取消", (dialogInterface, i) -> {
+                })
+                .create();
+        alertDialog.show();
+    }
+
+
     /**
      * 重新采集的弹窗
      */
-    private void showRestartCollectorDialog(){
+    private void showRestartCollectorDialog() {
         AlertDialog alertDialog = new AlertDialog.Builder(this)
                 .setTitle("重新开始")
                 .setMessage("本次数据采集完成,确定要重新开始新的手术监测吗？")
@@ -647,8 +721,6 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
             dialog.dismiss();
         });
     }
-
-
 
 
     /**
@@ -782,7 +854,7 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
     /**
      * 重置采集器 实现APP的重启
      */
-    public void resetApp(){
+    public void resetApp() {
         Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);

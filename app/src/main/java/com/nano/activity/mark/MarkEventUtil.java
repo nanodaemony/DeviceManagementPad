@@ -70,7 +70,6 @@ public class MarkEventUtil {
     public static String getCollectionNumberList() {
 
         StringBuilder builder = new StringBuilder();
-
         for (Integer number : AppStatic.collectionNumberList) {
             builder.append(number).append("#");
         }

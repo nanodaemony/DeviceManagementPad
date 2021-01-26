@@ -47,6 +47,7 @@ public class DataParserBaoLaiTeA8 implements DeviceDataParser {
 
         DataBaoLaiTeA8 dataBaoLaiTe = new DataBaoLaiTeA8();
         dataBaoLaiTe.setSerialNumber(serialNumber);
+        dataBaoLaiTe.setCollectionNumber(collectionNumber);
 
         if (verifyData(deviceOriginData)) {
 

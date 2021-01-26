@@ -56,8 +56,6 @@ public class DeviceChooseActivity extends AppCompatActivity implements HttpHandl
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_choose);
 
-        httpManager.getNetworkStatus();
-
         // 初始化几个仪器展示的布局(几个仪器的布局ID)
         int[] deviceLayoutIds = new int[28];
         deviceLayoutIds[0] = (R.id.device_choose_device_layout_1);
@@ -136,6 +134,8 @@ public class DeviceChooseActivity extends AppCompatActivity implements HttpHandl
             }
         });
 
+        // 最后看看网络状态
+        httpManager.getNetworkStatus();
 
     }
 

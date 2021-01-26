@@ -29,6 +29,7 @@ public class DataParserAiQin600C implements DeviceDataParser {
 
         DataAiQin600C dataAiQin600C = new DataAiQin600C();
         dataAiQin600C.setSerialNumber(serialNumber);
+        dataAiQin600C.setCollectionNumber(collectionNumber);
 
         // 正常仪器数据
         // EFEFEFXX23180000000B3135303238370001200030427B9F683DDC2A307FC000007FC000007FC0000032FEFEFE

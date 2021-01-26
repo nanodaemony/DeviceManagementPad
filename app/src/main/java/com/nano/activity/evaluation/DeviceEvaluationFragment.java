@@ -171,7 +171,8 @@ public class DeviceEvaluationFragment extends Fragment implements DeviceEvaluati
     public boolean checkAndStoreEvaluationInfo() {
 
         DeviceEvaluationTable evaluationTable = new DeviceEvaluationTable();
-
+        // 设置采集场次号
+        evaluationTable.setCollectionNumber(device.getCollectionNumber());
         // 使用科室
         String department = etDeviceDepartment.getText().toString().trim();
         if (department.length() == 0) {
@@ -195,7 +196,6 @@ public class DeviceEvaluationFragment extends Fragment implements DeviceEvaluati
                 ToastUtil.toast(getContext(), "尚未填写故障信息:" + device.getDeviceEnum().getCompanyName() + " " + device.getDeviceEnum().getDeviceName(), TastyToast.WARNING);
                 return false;
             }
-
         }
         // 获取已知故障原因
         evaluationTable.setKnownError(getErrorReason());

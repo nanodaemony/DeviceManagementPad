@@ -305,9 +305,7 @@ public class HttpManager {
         TaskExecutor.executeHttpTask(() -> {
             try {
                 logger.info("查询匹配标记信息列表");
-                Map<String, Object> params = new HashMap<>();
-                params.put("keyword", keyWord);
-                String res = HttpUtil.get(path, params);
+                String res = HttpUtil.post(path, new ParamPad(keyWord).generatePostString());
                 logger.info(res);
                 CommonResult commonResult = JSON.parseObject(res, CommonResult.class);
                 if (commonResult != null) {

@@ -28,6 +28,7 @@ public class DataParserLiBangEliteV8 implements DeviceDataParser {
 
         DataLiBangEliteV8 dataLiBangEliteV8 = new DataLiBangEliteV8();
         dataLiBangEliteV8.setSerialNumber(serialNumber);
+        dataLiBangEliteV8.setCollectionNumber(collectionNumber);
 
         if (verifyData(deviceOriginData)) {
             // 获取真实数据

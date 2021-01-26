@@ -42,6 +42,7 @@ public class DataParserMaiRuiT8 implements DeviceDataParser {
 
         DataMaiRuiT8 dataMaiRuiT8 = new DataMaiRuiT8();
         dataMaiRuiT8.setSerialNumber(serialNumber);
+        dataMaiRuiT8.setCollectionNumber(collectionNumber);
 
         // 存放单个HL7数据块
         List<String> dataBlocks = new ArrayList<>(16);
@@ -74,7 +75,7 @@ public class DataParserMaiRuiT8 implements DeviceDataParser {
      * @param dataMaiRuiT8 迈瑞数据
      * @param dataBlock 一个数据块
      */
-    private static void parseOneDataBlock(DataMaiRuiT8 dataMaiRuiT8, String dataBlock) {
+    private void parseOneDataBlock(DataMaiRuiT8 dataMaiRuiT8, String dataBlock) {
 
         // 需要去掉每个串中的0D即换行符不然解析不成功
         String dataBlockRemoveCR = dataBlock.replace("0D", "#");
@@ -82,7 +83,6 @@ public class DataParserMaiRuiT8 implements DeviceDataParser {
         for (String s : smallDataBlock) {
             // 获取真实的数据值
             String realData = DataParseUtils.hexStringToString(s);
-
 
             // 将真实的数据按照竖线划分
             String[] realDataBlock = realData.split("\\|");
@@ -294,17 +294,17 @@ public class DataParserMaiRuiT8 implements DeviceDataParser {
                         dataMaiRuiT8.setSpo2Pi(spo2PI);
                         break;
 
-                    case "170^NIBP S":
+                    case "170^Sys":
                         double nibpSystolic = Double.parseDouble(realDataBlock[5]);
                         dataMaiRuiT8.setNibpSystolic(nibpSystolic);
                         break;
 
-                    case "171^NIBP D":
+                    case "NM|171^Dia":
                         double nibpDiastolic = Double.parseDouble(realDataBlock[5]);
                         dataMaiRuiT8.setNibpDiastolic(nibpDiastolic);
                         break;
 
-                    case "172^NIBP M":
+                    case "172^Mean":
                         double nibpMean = Double.parseDouble(realDataBlock[5]);
                         dataMaiRuiT8.setNibpMean(nibpMean);
                         break;
@@ -376,65 +376,6 @@ public class DataParserMaiRuiT8 implements DeviceDataParser {
                         break;
 
                     // 下面的参数是存疑的,感觉有点像麻醉机的参数
-//                    case "212^C.I.":
-//                        double coCardiacOutput = Double.parseDouble(realDataBlock[5]);
-//                        dataMaiRuiT8.setCoCardiacOutput(coCardiacOutput);
-//                        break;
-//
-//                    case "210^C.O.":
-//                        double coCardiacIndex = Double.parseDouble(realDataBlock[5]);
-//                        dataMaiRuiT8.setCoCardiacIndex(coCardiacIndex);
-//                        break;
-//
-//                    case "213^TB":
-//                        double coBloodPressure = Double.parseDouble(realDataBlock[5]);
-//                        dataMaiRuiT8.setCoBloodPressure(coBloodPressure);
-//                        break;
-//
-//                    case "250^EtCO2":
-//                        int etCo2 = (int) Double.parseDouble(realDataBlock[5]);
-//                        dataMaiRuiT8.setAgCo2Et(etCo2);
-//                        break;
-//
-//                    case "251^FiCO2":
-//                        int fiCo2 = (int) Double.parseDouble(realDataBlock[5]);
-//                        dataMaiRuiT8.setAgCo2Fi(fiCo2);
-//                        break;
-//
-//                    case "253^EtO2":
-//                        int o2Et = (int) Double.parseDouble(realDataBlock[5]);
-//                        dataMaiRuiT8.setAgO2Et(o2Et);
-//                        break;
-//
-//                    case "254^FiO2":
-//                        int o2Fi = (int) Double.parseDouble(realDataBlock[5]);
-//                        dataMaiRuiT8.setAgO2Fi(o2Fi);
-//                        break;
-//
-//                    case "256^EtN2O":
-//                        int n2oEt = (int) Double.parseDouble(realDataBlock[5]);
-//                        dataMaiRuiT8.setAgN2oEt(n2oEt);
-//                        break;
-//
-//                    case "257^FiN2O":
-//                        int n2oFi = (int) Double.parseDouble(realDataBlock[5]);
-//                        dataMaiRuiT8.setAgN2oFi(n2oFi);
-//                        break;
-//
-//                    case "268^EtIso":
-//                        double isoEt = Double.parseDouble(realDataBlock[5]);
-//                        dataMaiRuiT8.setAgIsoEt(isoEt);
-//                        break;
-//
-//                    case "269^FiIso":
-//                        double isoFi = Double.parseDouble(realDataBlock[5]);
-//                        dataMaiRuiT8.setAgIsoFi(isoFi);
-//                        break;
-//
-//                    case "280^awRR(AG)":
-//                        double agAwRr = Double.parseDouble(realDataBlock[5]);
-//                        dataMaiRuiT8.setAgAwRr(agAwRr);
-//                        break;
                     default:
                 }
             }

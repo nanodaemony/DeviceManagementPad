@@ -30,6 +30,7 @@ public class DataParserMingXi implements DeviceDataParser {
 
         DataMingXi dataMingXi = new DataMingXi();
         dataMingXi.setSerialNumber(serialNumber);
+        dataMingXi.setCollectionNumber(collectionNumber);
         deviceOriginData = deviceOriginData.trim();
 
 

@@ -36,6 +36,7 @@ public class DataParserMaiRuiWatoex65 implements DeviceDataParser {
 
         DataMaiRuiWatoex65 dataMaiRuiWatoex65 = new DataMaiRuiWatoex65();
         dataMaiRuiWatoex65.setSerialNumber(serialNumber);
+        dataMaiRuiWatoex65.setCollectionNumber(collectionNumber);
 
         if (verifyData(deviceOriginData)) {
             // 去掉HL7的头和尾字段用于解析

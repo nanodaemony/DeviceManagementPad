@@ -44,6 +44,10 @@ public class ParamPad {
         this.collectionNumber = collectionNumber;
     }
 
+    public ParamPad(String data) {
+        this.data = data;
+    }
+
     public ParamPad(Integer collectionNumber, String data) {
         this.collectionNumber = collectionNumber;
         this.data = data;

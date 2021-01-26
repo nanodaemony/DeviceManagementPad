@@ -27,6 +27,7 @@ public class DataParserYiAn8700A implements DeviceDataParser {
 
         DataYiAn8700A dataYiAn8700A = new DataYiAn8700A();
         dataYiAn8700A.setSerialNumber(serialNumber);
+        dataYiAn8700A.setCollectionNumber(collectionNumber);
 
         // 将数据切分为4条进行分别解析
         String[] dataBlocks = deviceOriginData.split("%");
