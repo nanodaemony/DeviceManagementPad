@@ -26,7 +26,6 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.alibaba.fastjson.JSON;
 import com.nano.R;
 import com.nano.activity.collection.interfaces.FragmentOperationHandler;
 import com.nano.activity.evaluation.DeviceEvaluationFragment;
@@ -793,11 +792,24 @@ public class DataCollectionActivity extends AppCompatActivity implements Navigat
 
                 break;
 
+            case R.id.action_collection_help:
+
+                String msg = "1. 数据采集与控制. 本次采集的每个仪器都有一个仪器卡片用于单独的展示其采集的数据," +
+                        "通过点击仪器卡片左边的仪器图标并点击确认可以实现单个仪器的\"开始采集\"与\"结束采集\",如果多个仪器" +
+                        "是同时开始采集的,可以点击左下方的\"全部开始采集\"简化操作.\n" +
+                        "2. 术中事件标记. 点击右下角的\"添加标记\"进行手术事件的添加.\n" +
+                        "3. 采集评价. 每个仪器采集完成后会弹出评价弹窗,进行仪器采集的评价.";
+
+                SimpleDialog.show(this, "使用说明", msg, R.mipmap.help);
+
+                break;
+
 
             default:
         }
         return super.onOptionsItemSelected(item);
     }
+
 
     /**
      * 抽屉布局的导航目录

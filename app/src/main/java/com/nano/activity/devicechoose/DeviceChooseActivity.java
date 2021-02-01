@@ -29,6 +29,7 @@ import com.nano.device.MedicalDevice;
 import com.nano.http.HttpHandler;
 import com.nano.http.HttpManager;
 import com.nano.http.HttpMessage;
+import com.nano.http.ServerIpEnum;
 import com.sdsmdg.tastytoast.TastyToast;
 
 import java.io.Serializable;
@@ -50,6 +51,8 @@ public class DeviceChooseActivity extends AppCompatActivity implements HttpHandl
     private HttpManager httpManager = new HttpManager(DeviceChooseActivity.this);
 
     private Logger logger = new Logger("DeviceChooseActivity");
+
+    private int clickCounter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,6 +140,17 @@ public class DeviceChooseActivity extends AppCompatActivity implements HttpHandl
         // 最后看看网络状态
         httpManager.getNetworkStatus();
 
+        // 预生产模式
+        TextView tvPreProd = findViewById(R.id.device_choose_pre_prod);
+        tvPreProd.setOnClickListener(view -> {
+            clickCounter++;
+            if (clickCounter % 5 == 0) {
+                ToastUtil.toastSuccess(this, "Pre Production Mode.");
+                AppStatic.serverIpEnum = ServerIpEnum.CLOUD_SERVER_PRE_PROD;
+            } else {
+                AppStatic.serverIpEnum = ServerIpEnum.CLOUD_SERVER_PROD;
+            }
+        });
     }
 
 

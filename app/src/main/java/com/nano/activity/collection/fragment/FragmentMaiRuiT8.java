@@ -146,43 +146,41 @@ public class FragmentMaiRuiT8 extends android.support.v4.app.Fragment implements
     @Override
     public void updateReceiveCounterAndDeviceData(Integer receiveCounter, Object dataObject) {
         this.getActivity().runOnUiThread(() -> {
-            if (receiveCounter % 2 == 0) {
-                tvReceiveCounter.setText("" + receiveCounter);
-                // 转换为数据实体
-                DataMaiRuiT8 dataMaiRuiT8 = (DataMaiRuiT8) dataObject;
-                if (dataMaiRuiT8.getEcgHeartRate() != DataCons.INVALID_DATA_INTEGER) {
-                    tvDataEcgHr.setText(dataMaiRuiT8.getEcgHeartRate() + " bmp");
-                }
-                if (dataMaiRuiT8.getRespRespirationRate() != DataCons.INVALID_DATA_INTEGER) {
-                    tvDataResp.setText(dataMaiRuiT8.getRespRespirationRate() + "");
-                }
-                if (dataMaiRuiT8.getSpo2PulseRate() != DataCons.INVALID_DATA_INTEGER) {
-                    tvDataSpo2Pr.setText("" + dataMaiRuiT8.getSpo2PulseRate());
-                }
-                if (dataMaiRuiT8.getArtIbpMean() != DataCons.INVALID_DATA_DOUBLE) {
-                    tvDataArt.setText(
-                            dataMaiRuiT8.getArtIbpSystolic() + " mmHg\n"
-                                    + dataMaiRuiT8.getArtIbpDiastolic() + " mmHg\n("
-                                    + dataMaiRuiT8.getArtIbpMean() + ") mmHg");
-                }
+            tvReceiveCounter.setText("" + receiveCounter);
+            // 转换为数据实体
+            DataMaiRuiT8 dataMaiRuiT8 = (DataMaiRuiT8) dataObject;
+            if (dataMaiRuiT8.getEcgHeartRate() != DataCons.INVALID_DATA_INTEGER) {
+                tvDataEcgHr.setText(dataMaiRuiT8.getEcgHeartRate() + " bmp");
+            }
+            if (dataMaiRuiT8.getRespRespirationRate() != DataCons.INVALID_DATA_INTEGER) {
+                tvDataResp.setText(dataMaiRuiT8.getRespRespirationRate() + "");
+            }
+            if (dataMaiRuiT8.getSpo2PulseRate() != DataCons.INVALID_DATA_INTEGER) {
+                tvDataSpo2Pr.setText("" + dataMaiRuiT8.getSpo2PulseRate());
+            }
+            if (dataMaiRuiT8.getArtIbpMean() != DataCons.INVALID_DATA_DOUBLE) {
+                tvDataArt.setText(
+                        dataMaiRuiT8.getArtIbpSystolic() + " mmHg\n"
+                                + dataMaiRuiT8.getArtIbpDiastolic() + " mmHg\n("
+                                + dataMaiRuiT8.getArtIbpMean() + ") mmHg");
+            }
 
-                if (dataMaiRuiT8.getNibpDiastolic() != DataCons.INVALID_DATA_DOUBLE) {
-                    tvDataNibp.setText(dataMaiRuiT8.getNibpSystolic() + " mmHg\n" +
-                            dataMaiRuiT8.getNibpDiastolic() + " mmHg\n("
-                            + dataMaiRuiT8.getNibpMean() + ") mmHg");
-                }
-                if (dataMaiRuiT8.getTempTemperature1() != DataCons.INVALID_DATA_DOUBLE) {
-                    tvDataTemp.setText(dataMaiRuiT8.getTempTemperature1() + " ℃\n" +
-                            dataMaiRuiT8.getTempTemperature2() + " ℃\n" +
-                            dataMaiRuiT8.getTempTemperatureDifference() + " ℃");
-                }
-                if (dataMaiRuiT8.getSpo2PercentOxygenSaturation() != DataCons.INVALID_DATA_INTEGER) {
-                    tvDataSpo2.setText(dataMaiRuiT8.getSpo2PercentOxygenSaturation() + " %");
-                }
+            if (dataMaiRuiT8.getNibpDiastolic() != DataCons.INVALID_DATA_DOUBLE) {
+                tvDataNibp.setText(dataMaiRuiT8.getNibpSystolic() + " mmHg\n" +
+                        dataMaiRuiT8.getNibpDiastolic() + " mmHg\n("
+                        + dataMaiRuiT8.getNibpMean() + ") mmHg");
+            }
+            if (dataMaiRuiT8.getTempTemperature1() != DataCons.INVALID_DATA_DOUBLE) {
+                tvDataTemp.setText(dataMaiRuiT8.getTempTemperature1() + " ℃\n" +
+                        dataMaiRuiT8.getTempTemperature2() + " ℃\n" +
+                        dataMaiRuiT8.getTempTemperatureDifference() + " ℃");
+            }
+            if (dataMaiRuiT8.getSpo2PercentOxygenSaturation() != DataCons.INVALID_DATA_INTEGER) {
+                tvDataSpo2.setText(dataMaiRuiT8.getSpo2PercentOxygenSaturation() + " %");
+            }
 
-                if (dataMaiRuiT8.getSpo2PulseRate() != DataCons.INVALID_DATA_INTEGER) {
-                    tvDataSpo2Pr.setText(dataMaiRuiT8.getSpo2PulseRate() + " bpm");
-                }
+            if (dataMaiRuiT8.getSpo2PulseRate() != DataCons.INVALID_DATA_INTEGER) {
+                tvDataSpo2Pr.setText(dataMaiRuiT8.getSpo2PulseRate() + " bpm");
             }
 
         });

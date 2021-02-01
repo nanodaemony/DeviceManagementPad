@@ -29,7 +29,7 @@ public class HttpManager {
     /**
      * 与服务通信的路径，默认为生产环境路径
      */
-    public static String SERVER_IP = ServerIpEnum.LOCAL_WIFI.getPath();
+    public String SERVER_IP = AppStatic.serverIpEnum.getPath();
 
     /**
      * HTTP响应处理器

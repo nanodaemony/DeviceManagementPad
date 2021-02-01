@@ -4,6 +4,8 @@ import com.nano.device.MedicalDevice;
 import com.nano.activity.healthrecord.CollectionBasicInfoEntity;
 import com.nano.common.logger.LogLevelEnum;
 import com.nano.common.util.CommonUtil;
+import com.nano.http.ServerIpEnum;
+import com.nano.http.ServerPathEnum;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,12 +42,13 @@ public class AppStatic {
      * 默认的等级为普通信息
      */
     @Getter
-    public static LogLevelEnum logLevelEnum = LogLevelEnum.DEBUG;
+    public static LogLevelEnum logLevelEnum = LogLevelEnum.INFO;
 
     /**
      * 服务器默认路径(修改这个即可)
      */
-    // public static ServerPathEnum serverPathEnum = ServerPathEnum.CLOUD_SERVER_PROD;
+    public static ServerIpEnum serverIpEnum = ServerIpEnum.CLOUD_SERVER_PROD;
+
 
     /**
      *  采集器本地IP地址

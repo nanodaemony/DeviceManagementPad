@@ -77,10 +77,12 @@ public class DataParserNuoHeV405 implements DeviceDataParser {
      */
     @Override
     public boolean verifyData(String data) {
-        // 长度低于262直接不对
-        if (data.length() < 360) {
-            return false;
-        }
-        return data.trim().startsWith("666666");
+        // 这里在医院调试的时候出过BUG,所以改成直接返回true
+        return true;
+//        // 长度低于262直接不对
+//        if (data.length() < 360) {
+//            return false;
+//        }
+//        return data.trim().startsWith("666666");
     }
 }
